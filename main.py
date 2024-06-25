@@ -6,35 +6,18 @@ from pmdarima import auto_arima
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 
-# Sample data
-data = {
-    'Product': [
-        '2355107', '2358686', '2359456', '2359456', '2359456', '2359456', '2359456',
-        '2359456', '2359456', '2359456', '2359456', '2359456', '2359456', '2359456',
-        '2359456', '2359456', '2359456', '2359456', '2359456', '2359456', '2359456',
-        '2359456'
-    ],
-    'Date': [
-        '18/4/2023', '21/12/2023', '13/6/2024', '6/6/2024', '23/4/2024', '23/4/2024',
-        '19/2/2024', '2/2/2024', '17/10/2023', '3/10/2023', '18/8/2023', '19/6/2023',
-        '19/6/2023', '19/6/2023', '18/4/2023', '21/3/2023', '10/3/2023', '1/3/2023',
-        '4/1/2023', '4/1/2023', '1/9/2022', '18/5/2022'
-    ],
-    'Quantity': [
-        1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1
-    ]
-}
-
-df = pd.DataFrame(data)
-df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
-df.set_index('Date', inplace=True)
-
-# Filter for a specific product
-product_code = '2359456'
-df_product = df[df['Product'] == product_code]
-
-# Resample to monthly frequency, summing the quantities
-df_product = df_product['Quantity'].resample('M').sum()
+# Function to read CSV file and preprocess data
+def read_and_preprocess_csv(file_path, product_code):
+    df = pd.read_csv(file_path, delimiter=',')
+    df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+    df.set_index('Date', inplace=True)
+    
+    # Filter for a specific product
+    df_product = df[df['Product'] == product_code]
+    
+    # Resample to monthly frequency, summing the quantities
+    df_product = df_product['Quantity'].resample('M').sum()
+    return df_product
 
 # Function to fit and forecast with SARIMA model
 def fit_sarima(series):
@@ -101,30 +84,43 @@ def train_neural_network(series):
         print(f"Neural Network Error: {e}")
         return None
 
-# Fit and forecast using the models
-sarima_forecast = fit_sarima(df_product)
-arima_forecast = fit_arima(df_product)
-neural_network_forecast = train_neural_network(df_product)
+# Main function to run the forecasting
+def main(file_path, product_code):
+    df_product = read_and_preprocess_csv(file_path, product_code)
 
-# Check if all forecasts are generated successfully
-if sarima_forecast is not None and arima_forecast is not None and neural_network_forecast is not None:
-    plt.figure(figsize=(12, 8))
+    # Fit and forecast using the models
+    sarima_forecast = fit_sarima(df_product)
+    arima_forecast = fit_arima(df_product)
+    neural_network_forecast = train_neural_network(df_product)
 
-    plt.plot(df_product.index, df_product, label='Actual', marker='o')
+    # Check if all forecasts are generated successfully
+    if sarima_forecast is not None and arima_forecast is not None and neural_network_forecast is not None:
+        plt.figure(figsize=(12, 8))
 
-    forecast_index = pd.date_range(start=df_product.index[-1], periods=12, freq='M')
+        plt.plot(df_product.index, df_product, label='Actual', marker='o')
 
-    sarima_nn_forecast = sarima_forecast + neural_network_forecast.flatten()
-    plt.plot(forecast_index, sarima_nn_forecast, label='SARIMA + Neural Network Forecast', linestyle='--')
+        forecast_index = pd.date_range(start=df_product.index[-1], periods=12, freq='M')
 
-    arima_nn_forecast = arima_forecast + neural_network_forecast.flatten()
-    plt.plot(forecast_index, arima_nn_forecast, label='ARIMA + Neural Network Forecast', linestyle='-.')
+        sarima_nn_forecast = sarima_forecast + neural_network_forecast.flatten()
+        plt.plot(forecast_index, sarima_nn_forecast, label='SARIMA + Neural Network Forecast', linestyle='--')
 
-    plt.title('Quantity Forecast Comparison')
-    plt.xlabel('Date')
-    plt.ylabel('Quantity')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-else:
-    print("One or more forecasts were not generated successfully.")
+        arima_nn_forecast = arima_forecast + neural_network_forecast.flatten()
+        plt.plot(forecast_index, arima_nn_forecast, label='ARIMA + Neural Network Forecast', linestyle='-.')
+
+        plt.title('Quantity Forecast Comparison')
+        plt.xlabel('Date')
+        plt.ylabel('Quantity')
+        plt.legend()
+        plt.grid(True)
+
+        # Format x-axis to show mm/yyyy
+        plt.gca().xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%m/%Y'))
+
+        plt.show()
+    else:
+        print("One or more forecasts were not generated successfully.")
+
+# Example usage
+file_path = 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
+product_code = '2359456'  # Replace with the desired product code
+main(file_path, product_code)
