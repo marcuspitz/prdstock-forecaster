@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import StackingRegressor
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import KFold
 import random
 
 # Function to set random seed for reproducibility
@@ -224,15 +225,20 @@ def main_stacking(file_path, product_code):
     combined_val_forecast_arima_nn = handle_nans(combined_val_forecast_arima_nn)
 
     # Train stacking model on the validation set
+    n_splits = min(5, len(combined_val_forecast_sarima_nn))
+    kf = KFold(n_splits=n_splits)
+
     stacker_sarima_nn = StackingRegressor(
         estimators=[('sarima', LinearRegression()), ('nn', LinearRegression())],
-        final_estimator=LinearRegression()
+        final_estimator=LinearRegression(),
+        cv=kf
     )
     stacker_sarima_nn.fit(combined_val_forecast_sarima_nn, validation.values)
 
     stacker_arima_nn = StackingRegressor(
         estimators=[('arima', LinearRegression()), ('nn', LinearRegression())],
-        final_estimator=LinearRegression()
+        final_estimator=LinearRegression(),
+        cv=kf
     )
     stacker_arima_nn.fit(combined_val_forecast_arima_nn, validation.values)
 
