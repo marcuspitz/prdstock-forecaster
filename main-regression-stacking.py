@@ -273,5 +273,10 @@ def main_stacking(file_path, product_code):
 # Example usage
 file_path =  input("Enter the CSV file path: ") # 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
 product_code = input("Enter the product code to filter: ")# '2359456'  # Replace with the desired product code
-main_regression_based(file_path, product_code)
-main_stacking(file_path, product_code)
+approach = input("Choose between regression and stacking: ")
+if (approach == "regression"):
+    print("Regression was choosen")
+    main_regression_based(file_path, product_code)
+else:
+    print("Stacking was choosen")
+    main_stacking(file_path, product_code)
