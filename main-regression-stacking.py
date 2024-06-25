@@ -58,9 +58,9 @@ def train_neural_network(series, steps=12):
 
         def create_sequences(data, seq_length):
             xs, ys = [], []
-            for i in range(len(data)-seq_length):
-                x = data[i:i+seq_length]
-                y = data[i+seq_length]
+            for i in range(len(data) - seq_length):
+                x = data[i:i + seq_length]
+                y = data[i + seq_length]
                 xs.append(x)
                 ys.append(y)
             return np.array(xs), np.array(ys)
@@ -68,6 +68,10 @@ def train_neural_network(series, steps=12):
         seq_length = 6
         X, y = create_sequences(scaled_data, seq_length)
         
+        if len(X) < 2 or len(y) < 2:
+            print("Not enough data to train the neural network.")
+            return np.full(steps, np.nan)
+
         train_size = int(len(X) * 0.8)
         X_train, X_test = X[:train_size], X[train_size:]
         y_train, y_test = y[:train_size], y[train_size:]
@@ -103,6 +107,11 @@ def handle_nans(df):
 # Main function to run the forecasting with regression-based approach
 def main_regression_based(file_path, product_code):
     df_product = read_and_preprocess_csv(file_path, product_code)
+
+    # Ensure there is enough data
+    if len(df_product) < 2:
+        print("Not enough data for forecasting.")
+        return
 
     # Split into training and validation sets
     train_size = int(len(df_product) * 0.8)
@@ -185,6 +194,11 @@ def main_regression_based(file_path, product_code):
 # Main function to run the forecasting with stacking approach
 def main_stacking(file_path, product_code):
     df_product = read_and_preprocess_csv(file_path, product_code)
+
+    # Ensure there is enough data
+    if len(df_product) < 2:
+        print("Not enough data for forecasting.")
+        return
 
     # Split into training and validation sets
     train_size = int(len(df_product) * 0.8)
