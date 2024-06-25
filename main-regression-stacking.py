@@ -8,6 +8,13 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import StackingRegressor
 from sklearn.metrics import mean_squared_error
+import random
+
+# Function to set random seed for reproducibility
+def set_seed(seed=42):
+    np.random.seed(seed)
+    random.seed(seed)
+    tf.random.set_seed(seed)
 
 # Function to read CSV file and preprocess data
 def read_and_preprocess_csv(file_path, product_code):
@@ -64,6 +71,8 @@ def train_neural_network(series, steps=12):
         train_size = int(len(X) * 0.8)
         X_train, X_test = X[:train_size], X[train_size:]
         y_train, y_test = y[:train_size], y[train_size:]
+
+        set_seed()  # Set random seed for reproducibility
 
         model = tf.keras.Sequential([
             tf.keras.layers.Flatten(input_shape=[seq_length, 1]),
@@ -262,7 +271,7 @@ def main_stacking(file_path, product_code):
         print("One or more forecasts were not generated successfully.")
 
 # Example usage
-file_path =  input("Enter the CSV file path") # 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
-product_code = '2359456'  # Replace with the desired product code
+file_path =  input("Enter the CSV file path: ") # 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
+product_code = input("Enter the product code to filter: ")# '2359456'  # Replace with the desired product code
 main_regression_based(file_path, product_code)
 main_stacking(file_path, product_code)
