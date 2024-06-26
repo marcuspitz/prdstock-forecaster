@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from pmdarima import auto_arima
 import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import random
@@ -52,9 +51,6 @@ def fit_arima(series, steps=12):
 # Function to prepare data and train neural network
 def train_neural_network(series, steps=12):
     try:
-        scaler = MinMaxScaler()
-        scaled_data = scaler.fit_transform(series.values.reshape(-1, 1))
-
         def create_sequences(data, seq_length):
             xs, ys = [], []
             for i in range(len(data) - seq_length):
@@ -65,7 +61,7 @@ def train_neural_network(series, steps=12):
             return np.array(xs), np.array(ys)
 
         seq_length = 6
-        X, y = create_sequences(scaled_data, seq_length)
+        X, y = create_sequences(series.values, seq_length)
         
         if len(X) < 2 or len(y) < 2:
             print("Not enough data to train the neural network.")
@@ -80,7 +76,7 @@ def train_neural_network(series, steps=12):
         model = tf.keras.Sequential([
             tf.keras.layers.Flatten(input_shape=[seq_length, 1]),
             tf.keras.layers.Dense(10, activation='relu'),
-            tf.keras.layers.Dense(1)
+            tf.keras.layers.Dense(1)  # No activation function here to ensure output is not constrained
         ])
 
         model.compile(optimizer='adam', loss='mse')
@@ -93,8 +89,7 @@ def train_neural_network(series, steps=12):
             forecast.append(current_pred)
             current_batch = np.append(current_batch[:, 1:, :], [[current_pred]], axis=1)
 
-        forecast = scaler.inverse_transform(forecast)
-        return forecast.flatten()
+        return np.array(forecast).flatten()
     except Exception as e:
         print(f"Neural Network Error: {e}")
         return np.full(steps, np.nan)
