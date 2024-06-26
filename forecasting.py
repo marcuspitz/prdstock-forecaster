@@ -173,13 +173,13 @@ def main_regression_based(file_path, product_code):
     forecast_index = pd.date_range(start=df_product.index[-1], periods=12, freq='M')
 
     # Plot individual models' forecasts
-    plt.plot(forecast_index, sarima_forecast, label='SARIMA', linestyle='--')
-    plt.plot(forecast_index, arima_forecast, label='ARIMA', linestyle='-.')
-    plt.plot(forecast_index, neural_network_forecast, label='Neural Network', linestyle=':')
+    plt.plot(forecast_index, sarima_forecast, label='SARIMA', linestyle='--', color='blue')
+    plt.plot(forecast_index, arima_forecast, label='ARIMA', linestyle='-.', color='orange')
+    plt.plot(forecast_index, neural_network_forecast, label='Neural Network', linestyle=':', color='green')
 
     # Plot combined forecasts using the regression model
-    plt.plot(forecast_index, reg_combined_forecast_sarima_nn, label='SARIMA + Neural Network (Regression)', linestyle='--', color='r')
-    plt.plot(forecast_index, reg_combined_forecast_arima_nn, label='ARIMA + Neural Network (Regression)', linestyle='-.', color='g')
+    plt.plot(forecast_index, reg_combined_forecast_sarima_nn, label='SARIMA + Neural Network (Regression)', linestyle='-', color='red')
+    plt.plot(forecast_index, reg_combined_forecast_arima_nn, label='ARIMA + Neural Network (Regression)', linestyle='-', color='purple')
 
     plt.title('Quantity Forecast Comparison')
     plt.xlabel('Date')
