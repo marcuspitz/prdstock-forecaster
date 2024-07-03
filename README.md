@@ -8,7 +8,7 @@ This project forecasts product stock based on historical data.
 * Time series analysis
 
 ## getting started
-* `pip install pandas numpy matplotlib statsmodels pmdarima tensorflow scikit-learn`
+* `pip install pandas numpy matplotlib statsmodels pmdarima tensorflow scikit-learn XlsxWriter openpyxl`
 * `python main.py`
 
 ## build the executable
