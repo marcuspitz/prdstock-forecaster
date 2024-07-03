@@ -173,10 +173,10 @@ def main_regression_based(file_path, product_code):
     plt.plot(forecast_index, neural_network_forecast, label='Neural Network', linestyle=':', color='green')
 
     # Plot combined forecasts using the regression model
-    plt.plot(forecast_index, reg_combined_forecast_sarima_nn, label='SARIMA + Neural Network (Regression)', linestyle='-', color='red')
-    plt.plot(forecast_index, reg_combined_forecast_arima_nn, label='ARIMA + Neural Network (Regression)', linestyle='-', color='purple')
+    # plt.plot(forecast_index, reg_combined_forecast_sarima_nn, label='SARIMA + Neural Network (Regression)', linestyle='-', color='red')
+    # plt.plot(forecast_index, reg_combined_forecast_arima_nn, label='ARIMA + Neural Network (Regression)', linestyle='-', color='purple')
 
-    plt.title('Quantity Forecast Comparison')
+    plt.title('Min safety stock')
     plt.xlabel('Date')
     plt.ylabel('Quantity')
     plt.legend()
