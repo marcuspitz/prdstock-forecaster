@@ -101,8 +101,8 @@ def train_neural_network(series, steps=12):
 def handle_nans(df):
     return df.fillna(df.mean())
 
-# Main function to run the forecasting with regression-based approach
-def main_regression_based(file_path, product_code):
+# Main function to run the forecasting without regression-based combination
+def main_forecasting(file_path, product_code):
     df_product = read_and_preprocess_csv(file_path, product_code)
 
     # Ensure there is enough data
@@ -119,49 +119,10 @@ def main_regression_based(file_path, product_code):
     arima_val_forecast = fit_arima(train, steps=len(validation))
     nn_val_forecast = train_neural_network(train, steps=len(validation))
 
-    # Combine forecasts for the validation set
-    combined_val_forecast_sarima_nn = pd.DataFrame({
-        'SARIMA': sarima_val_forecast,
-        'NN': nn_val_forecast
-    }, index=validation.index)
-    combined_val_forecast_arima_nn = pd.DataFrame({
-        'ARIMA': arima_val_forecast,
-        'NN': nn_val_forecast
-    }, index=validation.index)
-
-    # Handle NaNs in the combined forecasts
-    combined_val_forecast_sarima_nn = handle_nans(combined_val_forecast_sarima_nn)
-    combined_val_forecast_arima_nn = handle_nans(combined_val_forecast_arima_nn)
-
-    # Train regression model on the validation set
-    reg_sarima_nn = LinearRegression()
-    reg_sarima_nn.fit(combined_val_forecast_sarima_nn, validation.values)
-    
-    reg_arima_nn = LinearRegression()
-    reg_arima_nn.fit(combined_val_forecast_arima_nn, validation.values)
-
     # Fit and forecast on the full data using the models
     sarima_forecast = fit_sarima(df_product)
     arima_forecast = fit_arima(df_product)
     neural_network_forecast = train_neural_network(df_product)
-
-    # Combine forecasts for the test set
-    combined_forecast_sarima_nn = pd.DataFrame({
-        'SARIMA': sarima_forecast,
-        'NN': neural_network_forecast
-    }, index=pd.date_range(start=df_product.index[-1], periods=12, freq='M'))
-    combined_forecast_arima_nn = pd.DataFrame({
-        'ARIMA': arima_forecast,
-        'NN': neural_network_forecast
-    }, index=pd.date_range(start=df_product.index[-1], periods=12, freq='M'))
-
-    # Handle NaNs in the combined forecasts
-    combined_forecast_sarima_nn = handle_nans(combined_forecast_sarima_nn)
-    combined_forecast_arima_nn = handle_nans(combined_forecast_arima_nn)
-
-    # Predict using the regression models
-    reg_combined_forecast_sarima_nn = reg_sarima_nn.predict(combined_forecast_sarima_nn)
-    reg_combined_forecast_arima_nn = reg_arima_nn.predict(combined_forecast_arima_nn)
 
     # Combine the data into a DataFrame for exporting
     forecast_index = pd.date_range(start=df_product.index[-1], periods=12, freq='M')
@@ -170,8 +131,6 @@ def main_regression_based(file_path, product_code):
         'SARIMA': pd.Series(sarima_forecast, index=forecast_index),
         'ARIMA': pd.Series(arima_forecast, index=forecast_index),
         'Neural Network': pd.Series(neural_network_forecast, index=forecast_index),
-        'SARIMA + Neural Network (Regression)': pd.Series(reg_combined_forecast_sarima_nn, index=forecast_index),
-        'ARIMA + Neural Network (Regression)': pd.Series(reg_combined_forecast_arima_nn, index=forecast_index)
     })
 
     # Create an Excel file and add the data
@@ -185,16 +144,21 @@ def main_regression_based(file_path, product_code):
 
     # Create a LineChart
     chart = LineChart()
-    chart.title = "Quantity Forecast Comparison"
+    chart.title = "Min safety stock"
     chart.style = 13
     chart.x_axis.title = "Date"
     chart.y_axis.title = "Quantity"
 
     # Add data to the chart
-    data = Reference(worksheet, min_col=2, min_row=1, max_col=7, max_row=len(results_df) + 1)
+    data = Reference(worksheet, min_col=2, min_row=1, max_col=5, max_row=len(results_df) + 1)
     categories = Reference(worksheet, min_col=1, min_row=2, max_row=len(results_df) + 1)
     chart.add_data(data, titles_from_data=True)
     chart.set_categories(categories)
+
+    # Specify colors for the series
+    colors = ['FF0000', '00FF00', '0000FF', 'FFFF00', 'FF00FF', '00FFFF']
+    for i, series in enumerate(chart.series):
+        series.graphicalProperties.line.solidFill = colors[i % len(colors)]
 
     # Add the chart to the worksheet
     worksheet.add_chart(chart, "A15")
@@ -206,5 +170,6 @@ def main_regression_based(file_path, product_code):
 
 # Example usage
 file_path =  input("Enter the CSV file path: ") # 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
+#file_path =  'C:\\Users\\marcus\\Downloads\\all-products-formatted-2.csv'
 product_code = input("Enter the product code to filter: ")# '2359456'  # Replace with the desired product code
-main_regression_based(file_path, product_code)
+main_forecasting(file_path, product_code)

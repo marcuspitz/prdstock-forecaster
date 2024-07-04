@@ -188,6 +188,7 @@ def main_regression_based(file_path, product_code):
     plt.show()
 
 # Example usage
-file_path =  input("Enter the CSV file path: ") # 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
+#file_path =  input("Enter the CSV file path: ") # 'C:\\Users\\marcus\\Downloads\\all-products-formatted.csv'  # Replace with the path to your CSV file
+file_path =  'C:\\Users\\marcus\\Downloads\\all-products-formatted-2.csv'
 product_code = input("Enter the product code to filter: ")# '2359456'  # Replace with the desired product code
 main_regression_based(file_path, product_code)
